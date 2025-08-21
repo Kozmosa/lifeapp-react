@@ -1,32 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-
-interface Task {
-  id: number;
-  title: string;
-  completed: boolean;
-}
+import { useTasks } from "../../hooks/use-tasks";
 
 export default function DailyTasks() {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: 1, title: "晨间锻炼 30 分钟", completed: false },
-    { id: 2, title: "阅读 20 页书籍", completed: false },
-    { id: 3, title: "写日记总结今天", completed: false },
-    { id: 4, title: "学习新技能 1 小时", completed: false },
-    { id: 5, title: "与家人/朋友沟通", completed: false },
-    { id: 6, title: "整理工作/学习笔记", completed: false },
-  ]);
+  const { tasks, loading, toggleTask, completedCount, totalCount } = useTasks('daily');
 
-  const toggleTask = (id: number) => {
-    setTasks(tasks.map(task => 
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ));
-  };
-
-  const completedCount = tasks.filter(task => task.completed).length;
-  const totalCount = tasks.length;
+  if (loading) {
+    return (
+      <div className="font-sans min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 p-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-gray-600 dark:text-gray-400">加载中...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="font-sans min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 p-6">

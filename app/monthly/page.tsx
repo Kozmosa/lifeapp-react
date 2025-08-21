@@ -1,95 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  completed: boolean;
-  category: string;
-  priority: "高" | "中" | "低";
-}
+import { useTasks } from "../../hooks/use-tasks";
+import { MonthlyTask } from "../../lib/types";
 
 export default function MonthlyTasks() {
-  const [tasks, setTasks] = useState<Task[]>([
-    { 
-      id: 1, 
-      title: "完成重要技能认证", 
-      description: "获得专业领域的认证或证书",
-      completed: false, 
-      category: "职业发展",
-      priority: "高"
-    },
-    { 
-      id: 2, 
-      title: "建立新的人际关系", 
-      description: "结识新朋友或扩展专业网络",
-      completed: false, 
-      category: "人际关系",
-      priority: "中"
-    },
-    { 
-      id: 3, 
-      title: "完成创意项目", 
-      description: "开始并完成一个个人创作项目",
-      completed: false, 
-      category: "个人成长",
-      priority: "中"
-    },
-    { 
-      id: 4, 
-      title: "健康体检和调整", 
-      description: "进行全面体检并制定健康计划",
-      completed: false, 
-      category: "健康管理",
-      priority: "高"
-    },
-    { 
-      id: 5, 
-      title: "财务规划和投资", 
-      description: "回顾财务状况并制定投资计划",
-      completed: false, 
-      category: "财务管理",
-      priority: "高"
-    },
-    { 
-      id: 6, 
-      title: "深度学习新领域", 
-      description: "系统学习一个全新的知识领域",
-      completed: false, 
-      category: "学习成长",
-      priority: "中"
-    },
-    { 
-      id: 7, 
-      title: "家庭关系维护", 
-      description: "加强与家人的联系和沟通",
-      completed: false, 
-      category: "家庭生活",
-      priority: "高"
-    },
-    { 
-      id: 8, 
-      title: "制定下月目标", 
-      description: "回顾本月成果并规划下月计划",
-      completed: false, 
-      category: "规划总结",
-      priority: "中"
-    },
-  ]);
+  const { tasks, loading, toggleTask, completedCount, totalCount } = useTasks('monthly');
 
-  const toggleTask = (id: number) => {
-    setTasks(tasks.map(task => 
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ));
-  };
+  if (loading) {
+    return (
+      <div className="font-sans min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 dark:from-gray-900 dark:to-gray-800 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-gray-600 dark:text-gray-400">加载中...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const completedCount = tasks.filter(task => task.completed).length;
-  const totalCount = tasks.length;
+  const monthlyTasks = tasks as MonthlyTask[];
 
-  const categories = Array.from(new Set(tasks.map(task => task.category)));
   const categoryColors: { [key: string]: string } = {
     "职业发展": "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
     "人际关系": "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
@@ -141,7 +72,7 @@ export default function MonthlyTasks() {
         {/* 优先级统计 */}
         <div className="grid grid-cols-3 gap-4 mb-8">
           {["高", "中", "低"].map((priority) => {
-            const priorityTasks = tasks.filter(task => task.priority === priority);
+            const priorityTasks = monthlyTasks.filter(task => task.priority === priority);
             const priorityCompleted = priorityTasks.filter(task => task.completed).length;
             return (
               <div key={priority} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
@@ -159,7 +90,7 @@ export default function MonthlyTasks() {
 
         {/* 任务列表 */}
         <div className="grid gap-6 md:grid-cols-2">
-          {tasks.map((task) => (
+          {monthlyTasks.map((task) => (
             <div
               key={task.id}
               className={`p-6 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:shadow-lg ${

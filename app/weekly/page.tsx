@@ -1,37 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-
-interface Task {
-  id: number;
-  title: string;
-  completed: boolean;
-  category: string;
-}
+import { useTasks } from "../../hooks/use-tasks";
+import { WeeklyTask } from "../../lib/types";
 
 export default function WeeklyTasks() {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: 1, title: "完成重要项目的规划", completed: false, category: "工作" },
-    { id: 2, title: "深度阅读 2 本书", completed: false, category: "学习" },
-    { id: 3, title: "与朋友聚会或深度交流", completed: false, category: "社交" },
-    { id: 4, title: "尝试新的运动或活动", completed: false, category: "健康" },
-    { id: 5, title: "整理和清洁生活空间", completed: false, category: "生活" },
-    { id: 6, title: "学习新技能或课程", completed: false, category: "学习" },
-    { id: 7, title: "回顾和规划下周目标", completed: false, category: "规划" },
-    { id: 8, title: "进行创意项目或爱好", completed: false, category: "创造" },
-  ]);
+  const { tasks, loading, toggleTask, completedCount, totalCount } = useTasks('weekly');
 
-  const toggleTask = (id: number) => {
-    setTasks(tasks.map(task => 
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ));
-  };
+  if (loading) {
+    return (
+      <div className="font-sans min-h-screen bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-900 dark:to-gray-800 p-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-gray-600 dark:text-gray-400">加载中...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const completedCount = tasks.filter(task => task.completed).length;
-  const totalCount = tasks.length;
+  const weeklyTasks = tasks as WeeklyTask[];
 
-  const categories = Array.from(new Set(tasks.map(task => task.category)));
+  const categories = Array.from(new Set(weeklyTasks.map(task => task.category)));
   const categoryColors: { [key: string]: string } = {
     "工作": "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
     "学习": "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
@@ -76,7 +66,7 @@ export default function WeeklyTasks() {
         {/* 分类统计 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {categories.map((category) => {
-            const categoryTasks = tasks.filter(task => task.category === category);
+            const categoryTasks = weeklyTasks.filter(task => task.category === category);
             const categoryCompleted = categoryTasks.filter(task => task.completed).length;
             return (
               <div key={category} className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
@@ -93,7 +83,7 @@ export default function WeeklyTasks() {
 
         {/* 任务列表 */}
         <div className="space-y-4">
-          {tasks.map((task) => (
+          {weeklyTasks.map((task) => (
             <div
               key={task.id}
               className={`p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:shadow-lg ${
