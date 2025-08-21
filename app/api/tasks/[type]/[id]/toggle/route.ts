@@ -4,10 +4,10 @@ import { TaskType } from '@/lib/types';
 
 export async function POST(
   request: Request,
-  { params }: { params: { type: string; id: string } }
+  { params }: { params: Promise<{ type: string; id: string }> }
 ) {
   try {
-    const { type, id } = params;
+    const { type, id } = await params;
     
     // 验证任务类型和ID
     if (!['daily', 'weekly', 'monthly'].includes(type)) {

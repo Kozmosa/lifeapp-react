@@ -12,7 +12,7 @@ export class PostgreSQLTaskProvider extends TaskDataProvider {
     });
   }
 
-  async loadTasks(type: TaskType): Promise&lt;Task[]&gt; {
+  async loadTasks(type: TaskType): Promise<Task[]> {
     const query = `
       SELECT task_id as id, title, description, category, priority
       FROM tasks 
@@ -22,7 +22,7 @@ export class PostgreSQLTaskProvider extends TaskDataProvider {
     
     const result = await this.pool.query(query, [type]);
     
-    return result.rows.map(row =&gt; {
+    return result.rows.map(row => {
       const baseTask = {
         id: row.id,
         title: row.title,
@@ -47,12 +47,12 @@ export class PostgreSQLTaskProvider extends TaskDataProvider {
     });
   }
 
-  async saveTasks(_type: TaskType, _tasks: Task[]): Promise&lt;void&gt; {
+  async saveTasks(_type: TaskType, _tasks: Task[]): Promise<void> {
     // 任务定义存储在数据库中，不需要通过此方法保存
     // 实际的任务完成状态通过 saveCompletionState 处理
   }
 
-  async loadCompletionState(type: TaskType): Promise&lt;TaskCompletionState&gt; {
+  async loadCompletionState(type: TaskType): Promise<TaskCompletionState> {
     const query = `
       SELECT task_id, completed
       FROM task_completions
@@ -62,14 +62,14 @@ export class PostgreSQLTaskProvider extends TaskDataProvider {
     const result = await this.pool.query(query, ['default_user', type]);
     
     const state: TaskCompletionState = {};
-    result.rows.forEach(row =&gt; {
+    result.rows.forEach(row => {
       state[row.task_id] = row.completed;
     });
     
     return state;
   }
 
-  async saveCompletionState(type: TaskType, state: TaskCompletionState): Promise&lt;void&gt; {
+  async saveCompletionState(type: TaskType, state: TaskCompletionState): Promise<void> {
     // 使用 PostgreSQL 的 UPSERT 功能
     const query = `
       INSERT INTO task_completions (user_id, type, task_id, completed, completed_at)
@@ -88,7 +88,7 @@ export class PostgreSQLTaskProvider extends TaskDataProvider {
   }
   
   // 确保在应用关闭时正确关闭连接池
-  async close(): Promise&lt;void&gt; {
+  async close(): Promise<void> {
     await this.pool.end();
   }
 }
