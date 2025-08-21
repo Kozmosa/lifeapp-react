@@ -20,6 +20,31 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## PostgreSQL Backend (Optional)
+
+This project includes an optional PostgreSQL backend that can be used instead of the default JSON+localStorage implementation.
+
+### Setup
+
+1. Install PostgreSQL on your system
+2. Create a database and user:
+   ```sql
+   CREATE USER lifeapp_user WITH PASSWORD 'your_password';
+   CREATE DATABASE lifeapp OWNER lifeapp_user;
+   ```
+3. Copy `.env.local.example` to `.env.local` and configure your database connection:
+   ```bash
+   cp .env.local.example .env.local
+   ```
+4. Update the DATABASE_URL in `.env.local` with your actual database credentials
+5. Run the database initialization script (see `docs/postgresql-middleware-design.md` for details)
+6. To enable the PostgreSQL backend, set `DATA_PROVIDER=postgresql` in your `.env.local` file
+
+### Switching between backends
+
+- To use the default JSON+localStorage backend: Leave `DATA_PROVIDER` unset or set to `json`
+- To use the PostgreSQL backend: Set `DATA_PROVIDER=postgresql`
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

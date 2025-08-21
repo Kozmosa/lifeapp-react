@@ -12,7 +12,7 @@ export class PostgreSQLTaskProvider extends TaskDataProvider {
     });
   }
 
-  async loadTasks(type: TaskType): Promise<Task[]> {
+  async loadTasks(type: TaskType): Promise&lt;Task[]&gt; {
     const query = `
       SELECT task_id as id, title, description, category, priority
       FROM tasks 
@@ -22,7 +22,7 @@ export class PostgreSQLTaskProvider extends TaskDataProvider {
     
     const result = await this.pool.query(query, [type]);
     
-    return result.rows.map(row => {
+    return result.rows.map(row =&gt; {
       const baseTask = {
         id: row.id,
         title: row.title,
@@ -37,9 +37,9 @@ export class PostgreSQLTaskProvider extends TaskDataProvider {
         case 'monthly':
           return { 
             ...baseTask, 
-            description: row.description,
-            category: row.category,
-            priority: row.priority
+            description: row.description || '',
+            category: row.category || '',
+            priority: row.priority || '中'
           } as MonthlyTask;
         default:
           return baseTask as Task;
@@ -47,12 +47,12 @@ export class PostgreSQLTaskProvider extends TaskDataProvider {
     });
   }
 
-  async saveTasks(_type: TaskType, _tasks: Task[]): Promise<void> {
+  async saveTasks(_type: TaskType, _tasks: Task[]): Promise&lt;void&gt; {
     // 任务定义存储在数据库中，不需要通过此方法保存
     // 实际的任务完成状态通过 saveCompletionState 处理
   }
 
-  async loadCompletionState(type: TaskType): Promise<TaskCompletionState> {
+  async loadCompletionState(type: TaskType): Promise&lt;TaskCompletionState&gt; {
     const query = `
       SELECT task_id, completed
       FROM task_completions
@@ -62,14 +62,14 @@ export class PostgreSQLTaskProvider extends TaskDataProvider {
     const result = await this.pool.query(query, ['default_user', type]);
     
     const state: TaskCompletionState = {};
-    result.rows.forEach(row => {
+    result.rows.forEach(row =&gt; {
       state[row.task_id] = row.completed;
     });
     
     return state;
   }
 
-  async saveCompletionState(type: TaskType, state: TaskCompletionState): Promise<void> {
+  async saveCompletionState(type: TaskType, state: TaskCompletionState): Promise&lt;void&gt; {
     // 使用 PostgreSQL 的 UPSERT 功能
     const query = `
       INSERT INTO task_completions (user_id, type, task_id, completed, completed_at)
@@ -85,5 +85,10 @@ export class PostgreSQLTaskProvider extends TaskDataProvider {
     for (const [taskId, completed] of Object.entries(state)) {
       await this.pool.query(query, ['default_user', type, parseInt(taskId), completed]);
     }
+  }
+  
+  // 确保在应用关闭时正确关闭连接池
+  async close(): Promise&lt;void&gt; {
+    await this.pool.end();
   }
 }
